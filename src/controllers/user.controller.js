@@ -34,16 +34,19 @@ router.patch("/:id",upload.single("profilePic"),async (req,res) =>{
   
         let user = await User.findByIdAndUpdate(req.params.id, req.body,{new:true});
 
-        if(req.file.path){
+        // if the req includes a new profile pic
+        if(req.file){
+          // get the path to the old profile pic
             let path = user.profile_pic;
-            
+            // delete the old profile pic
             fs.unlink(path, (err => {
                 if(err){
                     console.log(err);
                 }else{
-                    console.log('deleted profile pic');
+                    console.log('deleted old profile pic');
                 }
-            }));           
+            }));  
+            // update the path of the profile pic
             user =  await User.findByIdAndUpdate(req.params.id,{profile_pic : req.file.path},{new:true});
             
         }
@@ -56,10 +59,11 @@ router.patch("/:id",upload.single("profilePic"),async (req,res) =>{
 
 router.delete("/:id", async (req, res) => {
   try { 
-    
+    // remove the user from db
     let user = await User.findByIdAndRemove(req.params.id);
     let profile_pic_path = user.profile_pic;
     // console.log(profile_pic_path);
+    // remove user profile pic from uploads
     if (profile_pic_path){
         fs.unlink(profile_pic_path, (err) => {
           if (err) {
